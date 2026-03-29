@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import FriendRequest from "../models/friendRequest.model.js";
 import User from "../models/user.model.js";
+import { io } from "../server.js";
 
 export const sendFriendRequest = async (req, res) => {
   try {

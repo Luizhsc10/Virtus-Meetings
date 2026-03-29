@@ -9,6 +9,7 @@ import userRoutes from "./routes/user.route.js";
 import friendRequestRoutes from "./routes/friendRequest.route.js";
 import messageRoutes from "./routes/message.route.js";
 import { connectDB } from "./lib/db.js";
+import cors from "cors";
 
 dotenv.config();
 
@@ -19,7 +20,7 @@ const httpServer = createServer(app);
 
 export const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", "http://localhost:5173"],
     credentials: true,
   },
 });
@@ -27,13 +28,6 @@ export const io = new Server(httpServer, {
 const onlineUsers = new Map();
 
 io.on("connection", (socket) => {
-  socket.on("typing", ({ conversationId, userId }) => {
-    socket.to(conversationId).emit("typing", { conversationId, userId });
-  });
-
-  socket.on("stop-typing", ({ conversationId, userId }) => {
-    socket.to(conversationId).emit("stop-typing", { conversationId, userId });
-  });
   console.log("A user connected:", socket.id);
 
   socket.on("join-user-room", (userId) => {
@@ -44,6 +38,21 @@ io.on("connection", (socket) => {
 
   socket.on("join-conversation", (conversationId) => {
     socket.join(conversationId);
+  });
+
+  socket.on("typing", ({ conversationId, userId, fullName }) => {
+    socket.to(conversationId).emit("typing", {
+      conversationId,
+      userId,
+      fullName,
+    });
+  });
+
+  socket.on("stop-typing", ({ conversationId, userId }) => {
+    socket.to(conversationId).emit("stop-typing", {
+      conversationId,
+      userId,
+    });
   });
 
   socket.on("disconnect", () => {
@@ -61,6 +70,12 @@ io.on("connection", (socket) => {
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "http://localhost:5173"],
+    credentials: true,
+  }),
+);
 
 app.get("/", (req, res) => {
   res.send("API is running...");

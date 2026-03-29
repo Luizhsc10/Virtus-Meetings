@@ -24,12 +24,19 @@ export const onboardUser = async (req, res) => {
       profilePic,
     } = req.body;
 
+    const finalFullName = (fullName || req.user.fullName || "").trim();
+    const finalBio = (bio || "").trim();
+    const finalNativeLanguage = (nativeLanguage || "").trim();
+    const finalLearningLanguage = (learningLanguage || "").trim();
+    const finalLocation = (location || "").trim();
+    const finalProfilePic = (profilePic || "").trim();
+
     if (
-      !fullName ||
-      !bio ||
-      !nativeLanguage ||
-      !learningLanguage ||
-      !location
+      !finalFullName ||
+      !finalBio ||
+      !finalNativeLanguage ||
+      !finalLearningLanguage ||
+      !finalLocation
     ) {
       return res.status(400).json({
         message: "All onboarding fields are required",
@@ -39,12 +46,12 @@ export const onboardUser = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
       {
-        fullName: fullName.trim(),
-        bio: bio.trim(),
-        nativeLanguage: nativeLanguage.trim(),
-        learningLanguage: learningLanguage.trim(),
-        location: location.trim(),
-        profilePic: profilePic ? profilePic.trim() : "",
+        fullName: finalFullName,
+        bio: finalBio,
+        nativeLanguage: finalNativeLanguage,
+        learningLanguage: finalLearningLanguage,
+        location: finalLocation,
+        profilePic: finalProfilePic,
         isOnboarded: true,
       },
       {
